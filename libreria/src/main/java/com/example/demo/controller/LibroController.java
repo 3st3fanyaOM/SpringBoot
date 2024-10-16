@@ -1,21 +1,19 @@
 package com.example.demo.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.modelo.Libro;
 
 @RestController
@@ -25,7 +23,6 @@ public class LibroController {
 	List<Libro> libros = new ArrayList<>();
 
 	LibroController() {
-
 		List<String> generos1 = new ArrayList<>();
 		Libro l1 = new Libro(001, "El ancho mar", "Arturo López", "El Sur", "ES22", 2009, generos1);
 		l1.getGeneros().add("Terror");
@@ -51,7 +48,10 @@ public class LibroController {
 
 	@GetMapping // devuelve la lista de libros
 	public ResponseEntity<List<Libro>> mostrarLibros() {
-		return ResponseEntity.ok(libros);
+		if (libros.isEmpty())
+			return ResponseEntity.notFound().build();
+		else
+			return ResponseEntity.ok(libros);
 	}
 
 	@GetMapping("/{titulo}") // devuelve un libro por titulo
@@ -100,38 +100,63 @@ public class LibroController {
 		return ResponseEntity.notFound().build();
 	}
 
+	@PatchMapping
+	public ResponseEntity<Void> actualizarParcial(@RequestBody Libro libro) {
+		for (Libro libro1 : libros) {
+			if (libro1.getId() == libro.getId()) {
+				if (libro1.getAnioPublicacion() != 0) {
+					libro1.setAnioPublicacion(libro.getAnioPublicacion());
+				}
+				if (libro1.getAutor() != null) {
+					libro1.setAutor(libro.getAutor());
+				}
+				if (libro1.getEditorial() != null) {
+					libro1.setEditorial(libro.getEditorial());
+				}
+				if (libro1.getGeneros() != null) {
+					libro1.setGeneros(libro.getGeneros());
+				}
+				if (libro1.getIsbn() != null) {
+					libro1.setIsbn(libro.getIsbn());
+				}
+				if (libro1.getTitulo() != null) {
+					libro1.setTitulo(libro.getTitulo());
+				}
+				return ResponseEntity.noContent().build();
+			}
+
+		}
+		return ResponseEntity.notFound().build();
+	}
+
 	@GetMapping("/novelas") // devuelve lista de novelas
 	public ResponseEntity<List<Libro>> mostrarNovelas() {
 		List<Libro> novelas = new ArrayList<>();
 		for (Libro libro : libros) {
-			if(libro.getGeneros().contains("Novela")) {
+			if (libro.getGeneros().contains("Novela")) {
 				novelas.add(libro);
 			}
-			return ResponseEntity.ok(novelas);
 		}
-		return ResponseEntity.notFound().build();
+		if (novelas.isEmpty())
+			return ResponseEntity.notFound().build();
+		else
+			return ResponseEntity.ok(novelas);
+
 	}
 
-	@GetMapping("/{genero}") // devuelve lista por genero
-	public ResponseEntity<List<Libro>> mostrarPorGenero(@PathVariable String genero) {
+	@GetMapping("/porGenero/{genero}") // devuelve novelas por género
+	public ResponseEntity<List<Libro>> novelasPorGenero(@PathVariable String genero) {
 		List<Libro> librosGenero = new ArrayList<>();
 		for (Libro libro : libros) {
-			for (String genero1 : libro.getGeneros()) {
-				if (genero1.contentEquals(genero)) {
-					librosGenero.add(libro);
-					return ResponseEntity.ok(librosGenero);
-				}
+			if (libro.getGeneros().contains(genero)) {
+				librosGenero.add(libro);
 			}
 		}
-		return ResponseEntity.notFound().build();
-	}
+		if (librosGenero.isEmpty())
+			return ResponseEntity.notFound().build();
+		else
+			return ResponseEntity.ok(librosGenero);
 
-	@GetMapping("/mas_de/{n}")//Devuelve mapa con autores que tengan más de x libros
-	public ResponseEntity<Map<String,Integer>> mostrarAutoresConMasDe(@PathVariable Integer numLibros){
-		Map<String,Integer> mapa = new HashMap<>();
-		for(Libro libro: libros) {
-			mapa.put(libro.getAutor(), libro.);
-		}
 	}
 
 }
