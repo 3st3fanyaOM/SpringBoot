@@ -205,6 +205,7 @@ public class PeliculaController {
 				if (a.getNombre().equalsIgnoreCase(actor)) {
 					pelisPorActor.add(p);
 					break;//salgo del for por que ya encontre el actor
+					
 				}
 			}
 		}
