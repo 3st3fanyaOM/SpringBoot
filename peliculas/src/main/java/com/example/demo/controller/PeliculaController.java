@@ -51,13 +51,10 @@ public class PeliculaController {
 
 	@GetMapping
 	public ResponseEntity<List<Pelicula>> listarPeliculas() {
-		if (peliculas.isEmpty())
-			return ResponseEntity.notFound().build();
-		else
 			return ResponseEntity.ok(peliculas);
 	}
 
-	@GetMapping("/{titulo}")
+	@GetMapping("/titulo/{titulo}")
 	public ResponseEntity<Pelicula> peliculasPorTitulo(@PathVariable String titulo) {
 		for (Pelicula p : peliculas) {
 			if (p.getTitulo().equalsIgnoreCase(titulo)) {
@@ -89,22 +86,22 @@ public class PeliculaController {
 	}
 
 	@PatchMapping
-	public ResponseEntity<Void> actualizarPeliParcial(@RequestBody Pelicula pelicula) {
+	public ResponseEntity<Pelicula> actualizarPeliParcial(@RequestBody Pelicula pelicula) {
 		for (Pelicula p : peliculas) {
 			if (p.getId() == pelicula.getId()) {
-				if (p.getActores() != null) {
+				if (pelicula.getActores() != null) {
 					p.setActores(pelicula.getActores());
 				}
-				if (p.getDirector() != null) {
+				if (pelicula.getDirector() != null) {
 					p.setDirector(pelicula.getDirector());
 				}
-				if (p.getDuracion() != 0) {
+				if (pelicula.getDuracion() != 0) {
 					p.setDuracion(pelicula.getDuracion());
 				}
-				if (p.getLanzamiento() != null) {
+				if (pelicula.getLanzamiento() != null) {
 					p.setLanzamiento(pelicula.getLanzamiento());
 				}
-				if (p.getTitulo() != null) {
+				if (pelicula.getTitulo() != null) {
 					p.setTitulo(pelicula.getTitulo());
 				}
 
@@ -127,11 +124,11 @@ public class PeliculaController {
 		return ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/{director}")
+	@GetMapping("/director/{director}")
 	public ResponseEntity<List<Pelicula>> peliculasPorDirector(@PathVariable String director) {
 		List<Pelicula> pDirector = new ArrayList<>();
 		for (Pelicula p : peliculas) {
-			if (p.getDirector().equalsIgnoreCase(director)) {
+			if (director.equalsIgnoreCase(p.getDirector())) {
 				pDirector.add(p);
 			}
 		}
@@ -141,11 +138,11 @@ public class PeliculaController {
 			return ResponseEntity.ok(pDirector);
 	}
 
-	@GetMapping
+	@GetMapping("/masDe5anios")
 	public ResponseEntity<List<Pelicula>> peliculasCincoAños() {
 		List<Pelicula> pCincoAnios = new ArrayList<>();
 		for (Pelicula p : peliculas) {
-			if (p.getLanzamiento().isAfter(LocalDate.now().minusYears(5))) {
+			if (p.getLanzamiento().isBefore(LocalDate.now().minusYears(5))) {
 				pCincoAnios.add(p);
 			}
 		}
@@ -155,41 +152,43 @@ public class PeliculaController {
 			return ResponseEntity.ok(pCincoAnios);
 	}
 
-	@GetMapping
+	@GetMapping("/peliculaMasLarga")
 	public ResponseEntity<Pelicula> peliculaMasDuracion() {
-		Pelicula pMasLarga = null;
+		if (peliculas.isEmpty())
+			return ResponseEntity.notFound().build();
+		Integer duracion = 0;
+		Pelicula pMasLarga = peliculas.get(0);
 		for (Pelicula p : peliculas) {
-			if (p.getDuracion() > pMasLarga.getDuracion()) {
+			if (p.getDuracion() > duracion) {
 				pMasLarga = p;
-				return ResponseEntity.ok(pMasLarga);
 			}
 		}
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(pMasLarga);
 	}
 
 	@GetMapping("/directores/conMasDe/{n}")
-	public Map<String, Integer> dirMAsDeXPelis(@PathVariable int nPelis) {
+	public Map<String, Integer> dirMAsDeXPelis(@PathVariable int n) {
 		Map<String, Integer> contador = new HashMap<>();
 		for (Pelicula p : peliculas) {
-			String director = p.getDirector();
-			contador.put(director, contador.getOrDefault(director, 0) + 1);
+			contador.put(p.getDirector(), contador.getOrDefault(p.getDirector(), 0) + 1);
+			//si no lo encuentra asigna valor 0
 		}
 
 		Map<String, Integer> peliculasPorDirector = new HashMap<>();
 		for (Map.Entry<String, Integer> entry : contador.entrySet()) {
-			if (entry.getValue() > nPelis) {
+			if (entry.getValue() > n) {
 				peliculasPorDirector.put(entry.getKey(), entry.getValue());
 			}
 		}
 		return peliculasPorDirector;
 	}
 
-	@GetMapping
-	public ResponseEntity<Set<String>> actoresSinRepetir() {
-		Set<String> cjtoActores = new HashSet<>();
+	@GetMapping("/actoresUnicos")
+	public ResponseEntity<Set<Actor>> actoresSinRepetir() {
+		Set<Actor> cjtoActores = new HashSet<>();
 		for (Pelicula p : peliculas) {
 			for (Actor a : p.getActores()) {
-				cjtoActores.add(a.getNombre());
+				cjtoActores.add(a);
 			}
 		}
 		if (cjtoActores.isEmpty())
@@ -198,13 +197,14 @@ public class PeliculaController {
 			return ResponseEntity.ok(cjtoActores);
 	}
 
-	@GetMapping("/{actor}")
+	@GetMapping("/pelisporActor/{actor}")
 	public ResponseEntity<List<Pelicula>> peliculasPorActor(@PathVariable String actor) {
 		List<Pelicula> pelisPorActor = new ArrayList<>();
 		for (Pelicula p : peliculas) {
 			for (Actor a : p.getActores()) {
 				if (a.getNombre().equalsIgnoreCase(actor)) {
 					pelisPorActor.add(p);
+					break;//salgo del for por que ya encontre el actor
 				}
 			}
 		}
