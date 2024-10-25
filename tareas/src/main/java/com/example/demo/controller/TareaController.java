@@ -129,7 +129,7 @@ public class TareaController {
 			return ResponseEntity.ok(tareasEstado);
 	}
 
-	@GetMapping("/proximas/{dias}")
+	@GetMapping("/proximas/{dias}")//tareas próximas a vencer
 	public ResponseEntity<List<Tarea>> tareasProximas(@PathVariable Integer dias) {
 		List<Tarea> tareasProximas = new ArrayList<>();
 		for (Tarea t : tareas) {
@@ -143,6 +143,44 @@ public class TareaController {
 			return ResponseEntity.ok(tareasProximas);
 	}
 
-	@GetMapping("/ContarPorEstado")
-	public ResponseEntity<Integer> tareasEstado()
+	@GetMapping("/ContarPorEstado")//contar tareas por estado
+	public ResponseEntity<Integer> tareasEstado(@PathVariable String estado){
+		Integer tareasPorEstado = 0;
+		for (Tarea t :tareas) {
+			if(t.getEstado().equalsIgnoreCase(estado)) {
+				tareasPorEstado++;
+			}
+			if(t.getEstado().equalsIgnoreCase(estado)) {
+				tareasPorEstado++;
+			}
+			if(t.getEstado().equalsIgnoreCase(estado)) {
+				tareasPorEstado++;
+			}
+		}
+		return ResponseEntity.ok(tareasPorEstado);
+	}
+	
+	@GetMapping("/buscar/{palabraClave}")//tareas por palabra en descripcion 
+	public ResponseEntity<Tarea> tareaPorPalabraClave(@PathVariable String palabra){
+		for (Tarea t :tareas) {
+			if(t.getDescripcion().contains(palabra)) {
+				return ResponseEntity.ok(t);
+			}
+		}
+		return ResponseEntity.notFound().build();
+	}
+	
+	
+	@PatchMapping//marcar tarea como completada PAtch /marcar-completadas
+	public ResponseEntity<Void> marcarTareaCompletada(@RequestBody Tarea tarea){
+		for (Tarea t :tareas) {
+			if(t.getId()==tarea.getId()) {
+				if(tarea.getEstado()!=null) {
+					t.setEstado(COMPLETA);
+					return ResponseEntity.noContent().build();
+				}
+			}
+		}
+		return ResponseEntity.notFound().build();
+	}
 }
