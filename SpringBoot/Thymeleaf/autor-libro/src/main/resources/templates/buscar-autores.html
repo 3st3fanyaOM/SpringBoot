@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form th:action="@{/autores/buscar-autores}" method="get">
+        <label for="nombre">Buscar por Nombre:</label>
+        <input type="text" id="nombre" name="nombre" th:value="${nombre}" placeholder="Ingrese un nombre" />
+        <button type="submit">Buscar</button>
+    </form>
+    
+     <div th:if="${autores.size()==0}">
+        <p>No se encontraron autores con ese nombre.</p>
+    </div>
+    <ul th:if="${autores.size()>0}">
+        <li th:each="autor : ${autores}">
+            <p th:text="${autor.nombre}"></p>
+        </li>
+    </ul>
+</body>
+</html>

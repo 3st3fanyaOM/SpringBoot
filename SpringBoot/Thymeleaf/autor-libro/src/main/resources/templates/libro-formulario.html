@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form th:action="@{/autores/nuevo-libro}" th:object="${libro}" method="post">
+    <label for="titulo">Título del Libro:</label>
+    <input type="text" id="titulo" th:field="*{titulo}" />
+
+    <label for="autor">Autor:</label>
+    <select id="autor" name="autorId">
+        <option th:each="autor : ${autores}" th:value="${autor.id}" th:text="${autor.nombre}" ></option>
+    </select>
+
+    <button type="submit">Guardar</button>
+</form>
+</body>
+</html>
